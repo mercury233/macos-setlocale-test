@@ -7,11 +7,11 @@ const wchar_t testString[] = L"Hello, World! 你好，世界！😊👌";
 
 int testLocale(const char* locale) {
     //std::cout << "Testing locale: " << locale << std::endl;
-    if (setlocale(LC_ALL, locale) == nullptr) {
+    if (setlocale(LC_CTYPE, locale) == nullptr) {
         std::cerr << "Failed to set locale: " << locale << std::endl;
         return 1;
     }
-    std::cout << "Locale set to: " << setlocale(LC_ALL, nullptr) << std::endl;
+    std::cout << "Locale set to: " << setlocale(LC_CTYPE, nullptr) << std::endl;
     try {
         char buffer[256];
         size_t result = std::wcstombs(buffer, testString, sizeof(buffer));
@@ -31,7 +31,7 @@ int testLocale(const char* locale) {
 
 int main() {
     std::cout << "Testing setlocale..." << std::endl;
-    std::cout << "Current locale: " << setlocale(LC_ALL, nullptr) << std::endl;
+    std::cout << "Current locale: " << setlocale(LC_CTYPE, nullptr) << std::endl;
     
     const char* locales[] = {
         "en_US.UTF-8",
