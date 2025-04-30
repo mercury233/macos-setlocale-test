@@ -1,0 +1,61 @@
+name: Test Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-macos:
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - macos-13
+          - macos-15
+        include:
+          - os: macos-13
+            premake_version: 5.0.0-beta6
+          - os: macos-15
+            premake_version: 5.0.0-beta6
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout repository with submodules
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
+        submodules: true
+
+    - name: Download premake
+      id: premake
+      uses: mercury233/action-cache-download-file@v1.0.0
+      with:
+        url: https://github.com/premake/premake-core/releases/download/v${{ matrix.premake_version }}/premake-${{ matrix.premake_version }}-macosx.tar.gz
+        filename: premake5.tar.gz
+
+    - name: Extract premake
+      run: |
+        tar xf ${{ steps.premake.outputs.filepath }}
+        chmod +x ./premake5
+
+    - name: Use premake to generate make files
+      run: |
+        ./premake5 gmake
+
+    - name: Make
+      run: |
+        make
+
+    - name: Run
+      run: |
+        ./bin/release/test
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-${{ matrix.os }}
+        path: |
+          bin/*
